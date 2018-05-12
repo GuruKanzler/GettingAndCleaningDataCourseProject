@@ -1,3 +1,5 @@
+# Assigment description for last week in Coursera course: Getting and cleaning data.
+
 # The purpose of this project is to demonstrate your ability to collect, work with, and
 # clean a data set. The goal is to prepare tidy data that can be used for later analysis.
 # You will be graded by your peers on a series of yes/no questions related to the
@@ -33,9 +35,22 @@
 
 #############################################################################################
 # Preparations
+#############################################################################################
 
+# Packages needed
 library(data.table)
 library(plyr)
+
+# Create function used for last part of script. It adds the second argument as a 
+# prefix to the first argument.
+addPrefix <-    function(names, prefix) {
+        if (!(names %in% c("Subject", "Activity"))) {
+                paste(prefix, names, sep = "")
+        }
+        else {
+                names
+        }
+}
 
 # Create a destination folder for downloaded data if it doesn't already exists.
 if (!file.exists("./data")) {
@@ -57,7 +72,6 @@ if (!file.exists(f)) {
 
 # Store some file paths
 fpath           <- file.path(folder, "UCI HAR Dataset")
-
 fptrain         <- file.path(fpath, "train")
 fptest          <- file.path(fpath, "test")
 
@@ -65,8 +79,7 @@ fptest          <- file.path(fpath, "test")
 # Load data sets for train and test
 xtrain          <- read.table(file.path(fptrain, "X_train.txt"))
 ytrain          <- read.table(file.path(fptrain, "Y_train.txt"))
-subjecttrain    <-
-        read.table(file.path(fptrain, "subject_train.txt"))
+subjecttrain    <- read.table(file.path(fptrain, "subject_train.txt"))
 
 xtest           <- read.table(file.path(fptest, "X_test.txt"))
 ytest           <- read.table(file.path(fptest, "Y_test.txt"))
@@ -90,7 +103,7 @@ featurelabels   <-
 
 
 # 1)    Merges the training and the test sets to create one data set.
-# Merge trainig and test data sets
+#       Merge trainig and test data sets
 train           <- cbind(xtrain, subjecttrain, ytrain)
 test            <- cbind(xtest, subjecttest, ytest)
 sensordata      <- rbind(train, test)
@@ -100,13 +113,13 @@ names(sensordata) <-
 
 
 # 2)    Extracts only the measurements on the mean and standard deviation for each measurement.
-# subset data: keep mean and std measurements. (and subject/Id)
+#       subset data: keep mean and std measurements. (and subject/Id)
 sensordataMeanStd <-
         sensordata[, grepl("mean|std|Subject|Id", names(sensordata))]
 
 
 # 3)    Uses descriptive activity names to name the activities in the data set
-# Join in the names of the activities that the "Id" refers to.
+#       Join in the names of the activities that the "Id" refers to.
 sensordataMeanStd <-
         join(sensordataMeanStd,
              activitylabels,
@@ -116,8 +129,8 @@ sensordataMeanStd <- sensordataMeanStd[, -1]
 
 
 # 4)    Appropriately labels the data set with descriptive variable names.
-# Normalize names by removing parenthasises and following the norm of how variables
-# should be named in the R community.
+#       Normalize names by removing parenthasises and following the norm of how variables
+#       should be named in the R community.
 names(sensordataMeanStd) <-
         gsub("([()])", "", names(sensordataMeanStd))
 names(sensordataMeanStd) <- make.names(names(sensordataMeanStd))
@@ -129,20 +142,14 @@ names(sensordataMeanStd) <- make.names(names(sensordataMeanStd))
 SensorData_Mean_by_Activity_and_Subject <-
         ddply(sensordataMeanStd, c("Activity", "Subject"), numcolwise(mean))
 
-addPrefix <-    function(names, prefix) {
-        if (!(names %in% c("Subject", "Activity"))) {
-                paste(prefix, names, sep = "")
-        }
-        else {
-                names
-        }
-}
 
+# Add prefix to variable names
 names(SensorData_Mean_by_Activity_and_Subject) <-
         sapply(names(SensorData_Mean_by_Activity_and_Subject),
                addPrefix,
                prefix = "MeanOf.")
 
+# Output data set to file.
 write.table(
         SensorData_Mean_by_Activity_and_Subject,
         file = file.path(fpath, "SensorData_Mean_by_Activity_and_Subject.txt"),
