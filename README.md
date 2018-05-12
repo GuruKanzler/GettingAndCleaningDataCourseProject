@@ -1,5 +1,3 @@
-https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
-
 # Coursera course: Getting and Cleaning Data
 This repo contains the files associated with the project assignment in the last week (4) of the course *Getting and cleaning data* by Coursera .
 
